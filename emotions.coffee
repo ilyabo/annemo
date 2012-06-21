@@ -84,7 +84,7 @@ require('zappa').run 3001, ->
         buffer = []
         $.ajax
           type: 'post'
-          url: '/save_value'
+          url: 'save_value'
           dataType: 'json'
           data: 
             buffer: tosend
