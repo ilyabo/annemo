@@ -1,0 +1,14 @@
+{
+  "name": "emotions",
+  "version": "0.0.1",
+  "description": "Emotion recognition experiments",
+  "main": "./emotions.coffee",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/ilyabo/aiddata.git"
+  },
+  "dependencies": {
+    "eco": "1.1.0-rc-3",
+    "zappa": "0.3.3"
+  }
+}
