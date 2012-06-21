@@ -2,19 +2,21 @@ require('zappa').run 3001, ->
   
   fs = require("fs")
 
-  #@enable 'default layout'
-  @use 'static': __dirname + '/videos'
   @use 'static': __dirname + '/static'
 
-  #resultsFile = __dirname + '/results.csv'
+  video = @include './video'
+
   resultsFile = fs.createWriteStream __dirname + '/results.csv', {'flags': 'a'} 
   
 
   @use 'bodyParser', 'methodOverride', @app.router, 'static'
 
   @get '/': -> 
+    ###
     fs.readdir  __dirname + '/videos', (err, files) =>
       @render "home": { videos:files }
+    ###
+    @render "home": { videos : video.files }
   
   @view home: ->
     h2 -> "Welcome!"
@@ -51,7 +53,9 @@ require('zappa').run 3001, ->
 
 
   @get '/video': -> 
-    @render video: { video: @query.video, subject: @query.subject}
+    @render video:
+      video: video.location + @query.video
+      subject: @query.subject
 
 
   @view video: ->
@@ -153,8 +157,6 @@ require('zappa').run 3001, ->
     for obj in @body.buffer
       csv = csv + ((q(v) for k, v of obj).join(",") + "\n")
 
-
-    #f = fs.createWriteStream resultsFile, {'flags': 'a'}, ->
     resultsFile.write csv
 
     @send
