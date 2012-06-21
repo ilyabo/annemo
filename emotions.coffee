@@ -55,6 +55,7 @@ require('zappa').run 3001, ->
   @get '/video': -> 
     @render video:
       video: video.location + @query.video
+      videoName: @query.video
       subject: @query.subject
 
 
@@ -68,6 +69,7 @@ require('zappa').run 3001, ->
     script -> """
         subject = "#{@subject.replace(/"/g, '\\"')}"
         video = "#{@video}"
+        videoName = "#{@videoName}"
       """
 
     video id:"video", width:640, height:480, ->
@@ -97,7 +99,7 @@ require('zappa').run 3001, ->
       onValueChange = (e, ui) ->
         buffer.push
           subject: subject
-          video: video
+          video: videoName
           time: $("#video").get(0).currentTime
           value: ui.value
           playing: $("#video").data("isPlaying")
@@ -157,10 +159,12 @@ require('zappa').run 3001, ->
     for obj in @body.buffer
       csv = csv + ((q(v) for k, v of obj).join(",") + "\n")
 
-    resultsFile.write csv
-
-    @send
-      result: 'Ok'
+    resultsFile.write csv, (err) =>
+      unless err?
+        @send
+          result: 'Ok'
+      else
+        @next(err)
 
 
 
