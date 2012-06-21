@@ -6,7 +6,9 @@ require('zappa').run 3001, ->
   @use 'static': __dirname + '/videos'
   @use 'static': __dirname + '/static'
 
-  resultsFile = fs.createWriteStream __dirname + '/results.csv', {'flags': 'a'}
+  #resultsFile = __dirname + '/results.csv'
+  resultsFile = fs.createWriteStream __dirname + '/results.csv', {'flags': 'a'} 
+  
 
   @use 'bodyParser', 'methodOverride', @app.router, 'static'
 
@@ -15,7 +17,6 @@ require('zappa').run 3001, ->
       @render "home": { videos:files }
   
   @view home: ->
-    console.log @videos
     h2 -> "Welcome!"
 
     form action: "video", ->
@@ -75,18 +76,32 @@ require('zappa').run 3001, ->
     $ ->
       $("#video").data("isPlaying", false)
 
-      sendToServer = (e, ui) ->
+      buffer = []
+      maxBufferSize = 10
+
+      sendBufferToServer = ->
+        tosend = buffer
+        buffer = []
         $.ajax
           type: 'post'
           url: '/save_value'
           dataType: 'json'
-          data:
-            subject: subject
-            video: video
-            time: $("#video").get(0).currentTime
-            value: ui.value
-            playing: $("#video").data("isPlaying")
+          data: 
+            buffer: tosend
 
+
+      onValueChange = (e, ui) ->
+        buffer.push
+          subject: subject
+          video: video
+          time: $("#video").get(0).currentTime
+          value: ui.value
+          playing: $("#video").data("isPlaying")
+
+        if buffer.length > maxBufferSize
+          sendBufferToServer()
+
+  
       $(document).mousemove (e) ->
         s = $("#slider")
         h = $(".ui-slider-handle", s)
@@ -103,12 +118,13 @@ require('zappa').run 3001, ->
           max: 1,
           value: 0, 
           step:0.01,
-          slide: sendToServer,
-          change: sendToServer
+          slide: onValueChange,
+          change: onValueChange
         })
 
       $("#video").bind "ended", ->
         $(this).data("isPlaying", false)
+        sendBufferToServer()
 
       $("#start").click ->
         v = $("#video")
@@ -125,6 +141,28 @@ require('zappa').run 3001, ->
 
 
 
+  @post '/save_value': ->
+
+    q = (s) ->
+      if (s.indexOf(",") >= 0)
+        '"' + s.replace(/"/g, '\\"') + '"'
+      else
+        s
+
+    csv = ""
+    for obj in @body.buffer
+      csv = csv + ((q(v) for k, v of obj).join(",") + "\n")
+
+
+    #f = fs.createWriteStream resultsFile, {'flags': 'a'}, ->
+    resultsFile.write csv
+
+    @send
+      result: 'Ok'
+
+
+
+
   @view layout: ->
     doctype 5
     html ->
@@ -137,20 +175,6 @@ require('zappa').run 3001, ->
       body @body
 
 
-  @post '/save_value': ->
-    q = (s) ->
-      if (s.indexOf(",") >= 0)
-        '"' + s.replace(/"/g, '\\"') + '"'
-      else
-        s
-
-    csvLine = (q(v) for k, v of @body).join(",")
-    #console.log csvLine
-
-    resultsFile.write csvLine + "\n"
-
-    @send
-      result: 'Ok'
 
 
 

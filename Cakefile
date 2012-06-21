@@ -1,4 +1,7 @@
 {spawn, exec} = require 'child_process'
+path = require 'path'
+
+videosPath = 'videos'
 
 option '-e', '--environment [ENVIRONMENT_NAME]', 'set the environment for `restart`'
 
@@ -6,6 +9,7 @@ task 'build', ->
 
 
 task 'restart', 'Restart emotions.coffee', (options) ->
+  if !path.existsSync(videosPath) then fs.mkdirSync(videosPath, parseInt('0755', 8))
   invoke 'build'
   run 'PATH=/usr/bin:/usr/local/bin  && kill -9 `pgrep -f "coffee emotions.coffee"`'
   run "coffee emotions.coffee"
