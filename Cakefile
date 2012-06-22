@@ -9,13 +9,24 @@ option '-e', '--environment [ENVIRONMENT_NAME]', 'set the environment for `resta
 
 task 'build', ->
 
-
+###
 task 'restart', 'Restart #{app}', (options) ->
   invoke 'build'
-  run 'PATH=/usr/bin:/usr/local/bin:/opt/local/bin  && kill -9 `pgrep -f "coffee '+mainfile+'"`'
+  run 'PATH=/usr/bin:/usr/local/bin:/opt/local/bin && kill -9 `pgrep -f "coffee '+mainfile+'"`'
+  run "coffee #{mainfile}"
+###
+
+task 'start', "Start #{app}", (options) ->
+  invoke 'build'
   run "coffee #{mainfile}"
 
+task 'stop', "Stop #{app}", (options) ->
+  run 'PATH=/usr/bin:/usr/local/bin:/opt/local/bin && kill -9 `pgrep -f "coffee '+mainfile+'"`'
 
+
+task 'restart', "Restart #{app}", (options) ->
+  invoke 'stop'
+  invoke 'start'
 
 
 foreverBinary = "node_modules/forever/bin/forever"
