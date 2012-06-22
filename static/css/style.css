@@ -2,15 +2,19 @@ body, h1, div { font-family:arial;}
 
 body { padding:20px;}
 
-#slider { width:640px; }
-#buttonArea { margin-top:20px; }
+#content { width:640px; }
+
+
+
+#slider { width:100%; }
+
 #startVideo { width:5em; }
 
-#startSubmit { width:100px; height:20px; font-size:2em; margin-top:20px; }
+#startSubmit { width:100px; height:20px;  margin-top:20px; }
 
 div.formelem { padding:10px;}
 
-#slider { 
+#slider.arousal, #slider.valence { 
   background: #6290e0; /* Old browsers */
   background: -moz-linear-gradient(left,  #6290e0 0%, #a8a8a8 51%, #bc3d27 100%); /* FF3.6+ */
   background: -webkit-gradient(linear, left top, right top, color-stop(0%,#6290e0), color-stop(51%,#a8a8a8), color-stop(100%,#bc3d27)); /* Chrome,Safari4+ */
@@ -20,3 +24,14 @@ div.formelem { padding:10px;}
   background: linear-gradient(left,  #6290e0 0%,#a8a8a8 51%,#bc3d27 100%); /* W3C */
   filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#6290e0', endColorstr='#bc3d27',GradientType=1 ); /* IE6-9 */
 }
+
+#dimension { width:100%; text-align:center; font-size:20px; font-weight:bold; margin-bottom:10px;}
+
+#labels { width:100%; padding:2px; } 
+#labels .left {  width:50%;text-align:left; display:inline-block;} 
+#labels .right { width:50%;text-align:right; display:inline-block;  } 
+
+#buttonArea { width:100%; text-align:center; margin-top:20px; }
+
+.videolist {font-size:12px; list-style:none; padding-left:0;}
+.videolist li { padding:5px; padding-left:0px; }

@@ -12,38 +12,78 @@ require('zappa').run 3001, ->
 
   @use 'bodyParser', 'methodOverride', @app.router, 'static'
 
-  @get '/': -> 
-    ###
-    fs.readdir  __dirname + '/videos', (err, files) =>
-      @render "home": { videos:files }
-    ###
-    @render "home": { videos : video.files }
+  @get '/': ->
+    unless @query.subject in video.users
+      @send  "Subject must be properly specified"
+    @render "home" : { subject:@query.subject, layout: "frameset"}
   
-  @view home: ->
-    h2 -> "Welcome!"
 
-    form action: "video", ->
+  @view home: ->
+    console.log @subject
+    frame name:"menuFrame", src:"menu?subject=#{@subject}"
+    frame id:"videoFrame", name:"videoFrame", src:"about:blank"
+
+
+
+  @view frameset: ->
+    doctype 5
+    html ->
+      head -> title @title
+      frameset cols:"25%,*", -> @body
+
+
+  @get '/menu': -> 
+    @render "menu": { videos : video.files, users : video.users, subject:@query.subject}
+  
+
+  @view menu: ->
+
+    ###
+
+    form action: "video", target:"videoFrame", ->
       div class:"formelem", ->
         span -> "Test subject: "
-        input type:"text", name:"subject", id:"subject", ->
+        select name: "subject", id:"subject", ->
+          option value:"", -> ""
+          for v in @users
+            option -> v
 
+      div class:"formelem", ->
+        span -> "Dimension: "
+        select name: "dim", id:"dim", ->
+          option value:"", -> ""
+          option -> "arousal"
+          option -> "valence"
       div class:"formelem", ->
         span -> "Video to play: "
         select name: "video", id:"video", ->
           option value:"", -> ""
           for v in @videos
             option -> v
+    ###
 
+
+    div class:"formelem", ->
+      ul class:"videolist", ->
+        for dim in ["arousal", "valence"]
+          for v in @videos
+            li ->
+              a href:"video?video=#{v}&dim=#{dim}&subject=#{@subject}", target:"videoFrame",-> dim + " - " + v
+
+      ###
       div class:"formelem", ->
         input id:"startSubmit", type:"submit", value:"Start"
+      ###
 
       script src: 'home.js'
 
 
+
+
   @coffee '/home.js': ->
     $ ->
-      $("#startSubmit").click ->
-        if $("#subject").val().trim() is ""  or   $("#video").val() is ""
+      $(".videolist a").click ->
+        if $("#subject").val().trim() is ""  or   $("#dimension").val() is ""
           alert("Please, fill in the form fields")
           return false
         return true
@@ -54,29 +94,48 @@ require('zappa').run 3001, ->
 
 
   @get '/video': -> 
+    if not (@query.subject in video.users) or (not @query.video?) or (not @query.dim?)
+      @send  "Subject, video, dim must be properly specified"
+
     @render video:
       video: video.location + @query.video
       videoName: @query.video
       subject: @query.subject
+      dimension: @query.dim
 
 
   @view video: ->
     script src: 'video.js'
 
-    h2 -> "Hello #{@subject}!"
-    div id:"buttonArea",->
-      button id:"start", -> "Start"
-
     script -> """
         subject = "#{@subject.replace(/"/g, '\\"')}"
         video = "#{@video}"
         videoName = "#{@videoName}"
+        dimension = "#{@dimension}"
       """
 
-    video id:"video", width:640, height:480, ->
-      source src: @video
+    div id:"content", ->
 
-    div id:"slider"
+      div id:"buttonArea",->
+        button id:"start", -> "Start"
+
+      video id:"video", width:640, height:480, ->
+        source src: @video
+
+      div id:"dimension", -> "#{@dimension}"
+
+      div id:"slider", class:"#{@dimension}"
+
+      div id:"labels", ->
+        span class:"left", ->
+          switch @dimension
+            when "arousal" then "very passive"
+            when "valence" then "very negative"
+
+        span class:"right", ->
+          switch @dimension
+            when "arousal" then "very active"
+            when "valence" then "very positive"
 
 
   @coffee '/video.js': ->
@@ -102,6 +161,7 @@ require('zappa').run 3001, ->
           clienttime: Date.now()
           subject: subject
           video: videoName
+          dimension: dimension
           time: $("#video").get(0).currentTime
           value: ui.value
           playing: $("#video").data("isPlaying")
@@ -137,6 +197,7 @@ require('zappa').run 3001, ->
       $("#start").click ->
         v = $("#video")
         if not v.data("isPlaying")
+          v.get(0).currentTime = 0
           v.data("isPlaying", true)
            .get(0).play()
 
@@ -145,7 +206,7 @@ require('zappa').run 3001, ->
           v.data("isPlaying", false)
            .get(0).pause()
 
-          $(this).html("Play")
+          $(this).html("Restart")
 
 
 
