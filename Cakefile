@@ -17,7 +17,7 @@ task 'restart', 'Restart emotions.coffee', (options) ->
 
 
 
-foreverBinary = "node_modules/forever/forever"
+foreverBinary = "node_modules/forever/bin/forever"
 forever = (action, options) ->
   invoke 'build'
   options.environment or= 'production'
