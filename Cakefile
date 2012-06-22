@@ -1,6 +1,8 @@
 {spawn, exec} = require 'child_process'
 path = require 'path'
 
+mainfile = "emotions.coffee"
+
 
 option '-e', '--environment [ENVIRONMENT_NAME]', 'set the environment for `restart`'
 
@@ -9,8 +11,31 @@ task 'build', ->
 
 task 'restart', 'Restart emotions.coffee', (options) ->
   invoke 'build'
-  run 'PATH=/usr/bin:/usr/local/bin  && kill -9 `pgrep -f "coffee emotions.coffee"`'
-  run "coffee emotions.coffee"
+  run 'PATH=/usr/bin:/usr/local/bin  && kill -9 `pgrep -f "coffee '+mainfile+'"`'
+  run "coffee #{mainfile}"
+
+
+
+
+foreverBinary = "node_modules/forever/forever"
+forever = (action, options) ->
+  invoke 'build'
+  options.environment or= 'production'
+  run "NODE_ENV=#{options.environment} " +
+      "#{foreverBinary} #{action} -c coffee " +
+      " --sourceDir ./" +
+      " -l aiddata.log "+
+      #" -o logs/aiddata.out "+
+      #" -e logs/aiddata.err "+
+      " -a" +   # append logs
+      " #{mainfile}"
+
+
+task 'forever-restart', (options) -> forever 'restart', options
+task 'forever-start', (options) -> forever 'start', options
+task 'forever-stop', (options) -> run "#{foreverBinary} stop -c coffee #{mainfile}"
+task 'forever-list', (options) -> run "#{foreverBinary} list"
+
 
 
 
