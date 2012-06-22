@@ -12,7 +12,7 @@ task 'build', ->
 
 task 'restart', 'Restart #{app}', (options) ->
   invoke 'build'
-  run 'PATH=/usr/bin:/usr/local/bin  && kill -9 `pgrep -f "coffee '+mainfile+'"`'
+  run 'PATH=/usr/bin:/usr/local/bin:/opt/local/bin  && kill -9 `pgrep -f "coffee '+mainfile+'"`'
   run "coffee #{mainfile}"
 
 
