@@ -1,6 +1,7 @@
 require('zappa').run 3001, ->
   
   fs = require("fs")
+  dateFormat = require('dateformat')
 
   @use 'static': __dirname + '/static'
 
@@ -98,7 +99,7 @@ require('zappa').run 3001, ->
 
       onValueChange = (e, ui) ->
         buffer.push
-          timestamp: Date.now()
+          clienttime: Date.now()
           subject: subject
           video: videoName
           time: $("#video").get(0).currentTime
@@ -158,7 +159,8 @@ require('zappa').run 3001, ->
 
     csv = ""
     for obj in @body.buffer
-      csv = csv + ((q(v) for k, v of obj).join(",") + "\n")
+      formattedDate = q(dateFormat(Date.now(), "dddd, mmmm dS, yyyy, h:MM:ss TT"))
+      csv = csv + formattedDate + "," + ((q(v) for k, v of obj).join(",") + "\n")
 
     resultsFile.write csv, (err) =>
       unless err?
