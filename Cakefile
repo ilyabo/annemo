@@ -1,6 +1,7 @@
 {spawn, exec} = require 'child_process'
 path = require 'path'
 
+app = "emotions"
 mainfile = "emotions.coffee"
 
 
@@ -9,7 +10,7 @@ option '-e', '--environment [ENVIRONMENT_NAME]', 'set the environment for `resta
 task 'build', ->
 
 
-task 'restart', 'Restart emotions.coffee', (options) ->
+task 'restart', 'Restart #{app}', (options) ->
   invoke 'build'
   run 'PATH=/usr/bin:/usr/local/bin  && kill -9 `pgrep -f "coffee '+mainfile+'"`'
   run "coffee #{mainfile}"
@@ -24,9 +25,9 @@ forever = (action, options) ->
   run "NODE_ENV=#{options.environment} " +
       "#{foreverBinary} #{action} -c coffee " +
       " --sourceDir ./" +
-      " -l aiddata.log "+
-      #" -o logs/aiddata.out "+
-      #" -e logs/aiddata.err "+
+      " -l #{app}.log "+
+      #" -o logs/#{app}.out "+
+      #" -e logs/#{app}.err "+
       " -a" +   # append logs
       " #{mainfile}"
 
