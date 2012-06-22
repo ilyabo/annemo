@@ -98,6 +98,7 @@ require('zappa').run 3001, ->
 
       onValueChange = (e, ui) ->
         buffer.push
+          timestamp: Date.now()
           subject: subject
           video: videoName
           time: $("#video").get(0).currentTime
