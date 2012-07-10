@@ -1,14 +1,20 @@
 require('zappa').run 3001, ->
   
   fs = require("fs")
+  path = require("path")
   dateFormat = require('dateformat')
 
   @use 'static': __dirname + '/static'
 
   video = @include './video'
 
-  resultsFile = fs.createWriteStream __dirname + '/results.csv', {'flags': 'a'} 
+  #resultsFile = fs.createWriteStream __dirname + '/results.csv', {'flags': 'a'} 
+  resultsDir = __dirname + "/results"
   
+  mkdir = (dir) -> if !path.existsSync(dir) then fs.mkdirSync(dir, parseInt('0755', 8))
+
+  mkdir(resultsDir)
+
 
   @use 'bodyParser', 'methodOverride', @app.router, 'static'
 
@@ -75,11 +81,11 @@ require('zappa').run 3001, ->
         input id:"startSubmit", type:"submit", value:"Start"
       ###
 
-      script src: 'home.js'
+      #script src: 'home.js'
 
 
 
-
+  ###
   @coffee '/home.js': ->
     $ ->
       $(".videolist a").click ->
@@ -87,7 +93,7 @@ require('zappa').run 3001, ->
           alert("Please, fill in the form fields")
           return false
         return true
-
+  ###
 
 
 
@@ -143,14 +149,14 @@ require('zappa').run 3001, ->
       $("#video").data("isPlaying", false)
 
       buffer = []
-      maxBufferSize = 10
+      maxBufferSize = 1
 
       sendBufferToServer = ->
         tosend = buffer
         buffer = []
         $.ajax
           type: 'post'
-          url: 'save_value'
+          url: 'save_value?subject=' + subject
           dataType: 'json'
           data: 
             buffer: tosend
@@ -166,7 +172,7 @@ require('zappa').run 3001, ->
           value: ui.value
           playing: $("#video").data("isPlaying")
 
-        if buffer.length > maxBufferSize
+        if buffer.length >= maxBufferSize
           sendBufferToServer()
 
   
@@ -211,6 +217,10 @@ require('zappa').run 3001, ->
 
 
   @post '/save_value': ->
+    if not (@query.subject in video.users)
+      @next(new Error "Subject must be properly specified")
+
+    subj = @query.subject
 
     q = (s) ->
       if (s.indexOf(",") >= 0)
@@ -223,12 +233,15 @@ require('zappa').run 3001, ->
       formattedDate = q(dateFormat(Date.now(), "dddd, mmmm dS, yyyy, h:MM:ss TT"))
       csv = csv + formattedDate + "," + ((q(v) for k, v of obj).join(",") + "\n")
 
+    resultsFile = fs.createWriteStream("#{resultsDir}/#{subj}.csv", {'flags': 'a'})
     resultsFile.write csv, (err) =>
+      
       unless err?
         @send
           result: 'Ok'
       else
         @next(err)
+
 
 
 
