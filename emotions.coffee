@@ -71,10 +71,12 @@ require('zappa').run 3001, ->
 
     div class:"formelem", ->
       ul class:"videolist", ->
-        for dim in ["arousal", "valence"]
-          for v in @videos
+        for v in @videos
+          for dim in ["arousal", "valence"]
             li ->
               a href:"video?video=#{v}&dim=#{dim}&subject=#{@subject}", target:"videoFrame",-> dim + " - " + v
+          li -> a href:"social?video=#{v}&subject=#{@subject}", target:"videoFrame", -> "social dimension annotation"
+          li -> hr width:"100%"
 
       ###
       div class:"formelem", ->
@@ -95,6 +97,80 @@ require('zappa').run 3001, ->
         return true
   ###
 
+
+
+  @get '/social': ->
+    if not (@query.subject in video.users) or (not @query.video?)
+      @send  "Subject, video must be properly specified"
+
+
+    @render social:
+      videoName: @query.video
+      subject: @query.subject
+
+
+  @view social: ->
+
+    script src: 'social.js'
+
+    script -> """
+        subject = "#{@subject.replace(/"/g, '\\"')}"
+        videoName = "#{@videoName}"
+      """
+
+    h1 -> "Social Interaction Dimensions Annotation"
+    div -> "Video: #{@videoName}"
+
+    div id:'content', ->
+      div id:'propsToAnnotate',style:'margin-top:20px',->
+        div style:'margin:20px 0', -> "Please, annotate the following dimensions: "
+
+        props = [
+          "Agreement", "Engagement", "Dominance", "Performance", "Rapport"
+        ]
+
+        for p in props 
+          div class:'prop',->
+            div class:'propLabel', -> p
+            div class:'slider social', id:p
+            div id:"labels", ->
+              span class:"left", -> "very low"
+              span class:"right", -> "very high"
+
+        button id:'saveBut', -> "Save"
+
+
+
+
+  @coffee '/social.js': ->
+    $ ->
+      $(".slider")
+        .slider({ 
+          orientation: 'horizontal',
+          min: -1,
+          max: 1,
+          value: 0, 
+          step:0.1
+        })
+
+
+      $("#saveBut").click ->
+
+        propVals = {}
+        $(".slider").each (i, slider) ->
+          propVals[$(slider).attr("id")] = $(slider).slider("option", "value")
+
+        #console.log values
+
+
+        $.ajax
+          type: 'get'
+          url: "save_social?subject=#{subject}&video=#{videoName}"
+          dataType: 'json'
+          data: propVals
+            
+
+        $("#propsToAnnotate").html("Thanks! Please, proceed to the next video.")
 
 
 
@@ -215,6 +291,18 @@ require('zappa').run 3001, ->
           $(this).html("Restart")
 
 
+  q = (s) ->
+    if (s.indexOf(",") >= 0)
+      '"' + s.replace(/"/g, '\\"') + '"'
+    else
+      s
+
+
+  saveCsv = (subj, csv, callback) ->
+    resultsFile = fs.createWriteStream("#{resultsDir}/#{subj}.csv", {'flags': 'a'})
+    resultsFile.write csv, callback
+
+
 
   @post '/save_value': ->
     if not (@query.subject in video.users)
@@ -222,19 +310,37 @@ require('zappa').run 3001, ->
 
     subj = @query.subject
 
-    q = (s) ->
-      if (s.indexOf(",") >= 0)
-        '"' + s.replace(/"/g, '\\"') + '"'
-      else
-        s
 
     csv = ""
     for obj in @body.buffer
       formattedDate = q(dateFormat(Date.now(), "dddd, mmmm dS, yyyy, h:MM:ss TT"))
       csv = csv + formattedDate + "," + ((q(v) for k, v of obj).join(",") + "\n")
 
-    resultsFile = fs.createWriteStream("#{resultsDir}/#{subj}.csv", {'flags': 'a'})
-    resultsFile.write csv, (err) =>
+    saveCsv subj, csv, (err) =>
+      
+      unless err?
+        @send
+          result: 'Ok'
+      else
+        @next(err)
+
+
+
+
+
+
+  @get '/save_social': ->
+    if not (@query.subject in video.users) or not (@query.video in video.files)
+      @next(new Error "Subject, video must be properly specified")
+
+    subj = @query.subject
+
+    console.log @query.values
+
+    csv = "Social," + ((q(v) for k, v of @query).join(",") + "\n")
+    console.log @query
+
+    saveCsv subj, csv, (err) =>
       
       unless err?
         @send
