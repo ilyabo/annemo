@@ -150,7 +150,7 @@ require('zappa').run 3001, ->
           min: -1,
           max: 1,
           value: 0, 
-          step:0.1
+          step:0.33
         })
 
 
@@ -201,7 +201,7 @@ require('zappa').run 3001, ->
       #div id:"buttonArea",->
       #  button id:"start", -> "Start"
 
-      video id:"video", width:640, height:480, preload:"auto", controls:"controls", ->
+      video id:"video", width:640, height:480, preload:"auto", controls:"controls",4 ->
         source src: @video
 
       #div id:"loadProgress"
