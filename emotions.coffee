@@ -225,7 +225,7 @@ require('zappa').run 3001, ->
   @coffee '/video.js': ->
     $ ->
       $("#video").get(0).play()
-      $("#video").get(0).pause()
+      $("#video").delay(1000).get(0).pause()
 
       $("#video")
         .data("isPlaying", false)
