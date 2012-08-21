@@ -198,11 +198,13 @@ require('zappa').run 3001, ->
 
     div id:"content", ->
 
-      div id:"buttonArea",->
-        button id:"start", -> "Start"
+      #div id:"buttonArea",->
+      #  button id:"start", -> "Start"
 
-      video id:"video", width:640, height:480, ->
+      video id:"video", width:640, height:480, preload:"auto", controls:"controls", ->
         source src: @video
+
+      #div id:"loadProgress"
 
       div id:"dimension", -> "#{@dimension}"
 
@@ -222,7 +224,14 @@ require('zappa').run 3001, ->
 
   @coffee '/video.js': ->
     $ ->
-      $("#video").data("isPlaying", false)
+      $("#video")
+        .data("isPlaying", false)
+        ###
+        .on("progress",  ->
+          $("#loadProgress").html("Progress: " + $('#video').get(0).buffered.end(0) / $('#video').get(0).duration)
+        )
+        ###
+
 
       buffer = []
       maxBufferSize = 1
@@ -276,6 +285,7 @@ require('zappa').run 3001, ->
         $(this).data("isPlaying", false)
         sendBufferToServer()
 
+      ###
       $("#start").click ->
         v = $("#video")
         if not v.data("isPlaying")
@@ -289,6 +299,8 @@ require('zappa').run 3001, ->
            .get(0).pause()
 
           $(this).html("Restart")
+      ###
+
 
 
   q = (s) ->
