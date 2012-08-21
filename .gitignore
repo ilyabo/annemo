@@ -2,4 +2,5 @@
 results.csv
 results/
 videos/
-node_modules/
+node_modules
+video.coffee
