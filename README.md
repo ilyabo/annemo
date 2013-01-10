@@ -20,15 +20,17 @@ To download the project dependencies in the project directory run:
     npm install
 
 
-Then, configure the videos and the allowed user ids in [config.coffee](https://github.com/ilyabo/annemo/blob/master/config.coffee)
+Then, configure the videos and the allowed user ids in [config.coffee](https://github.com/ilyabo/annemo/blob/master/config.coffee).
 
 
 To start the server run:
 
     cake forever-start
 
-and open [http://localhost:3001](http://localhost:3001) in your browser.
+Then, open in your browser [http://localhost:3001/?subject=8935](http://localhost:3001/?subject=8935)
+where 8935 is one of the valid user ids specified in your [config.coffee](https://github.com/ilyabo/annemo/blob/master/config.coffee).
 
+The annotation results will be saved in CSV files in results/ directory.
 
 To restart the server:
 
