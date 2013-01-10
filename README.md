@@ -7,7 +7,6 @@ Web app for annotating emotions in human speech video recordings.
 Installation
 ======
 Install [Node.js 0.6.x](http://nodejs.org/dist/v0.6.16/docs/#)
-
 Then, install CoffeeScript
 
     npm install -g coffee-script
@@ -16,6 +15,10 @@ Then, install CoffeeScript
 To download the project dependencies in the project directory run 
 
     npm install
+
+
+Configure the videos and the allowed user ids in config.coffee
+
 
 Then, to start the server run
 
