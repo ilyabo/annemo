@@ -6,7 +6,7 @@ require('zappa').run 3001, ->
 
   @use 'static': __dirname + '/static'
 
-  video = @include './video'
+  video = @include './config'
 
   #resultsFile = fs.createWriteStream __dirname + '/results.csv', {'flags': 'a'} 
   resultsDir = __dirname + "/results"
