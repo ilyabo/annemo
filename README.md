@@ -6,7 +6,7 @@ A simplistic web app for annotating emotions in human speech video recordings.
 ![annemo screenshot](https://github.com/ilyabo/annemo/raw/master/doc/screenshot.png)
 
 
-Installation
+Installation and running
 ======
 Install [Node.js 0.6.x](http://nodejs.org/dist/v0.6.16/docs/#)
 
