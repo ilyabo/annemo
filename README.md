@@ -1,7 +1,7 @@
 Annemo
 ======
 
-Web app for annotating emotions in human speech video recordings.
+A simplistic web app for annotating emotions in human speech video recordings.
 
 ![annemo screenshot](https://github.com/ilyabo/annemo/raw/master/doc/screenshot.png)
 
