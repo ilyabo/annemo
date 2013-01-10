@@ -27,7 +27,7 @@ To start the server run:
 
     cake forever-start
 
-and open http://localhost:3001 in your browser.
+and open [http://localhost:3001](http://localhost:3001) in your browser.
 
 
 To restart the server:
